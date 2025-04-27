@@ -1,4 +1,14 @@
 
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+
 interface ServerCardProps {
   title: string;
   description: string;
@@ -7,20 +17,26 @@ interface ServerCardProps {
 
 const ServerCard = ({ title, description, isOfficial }: ServerCardProps) => {
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-      <div className="flex items-center space-x-2 mb-4">
-        <h3 className="text-xl font-semibold text-gray-900">{title}</h3>
-        {isOfficial && (
-          <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-            official
-          </span>
-        )}
-      </div>
-      <p className="text-gray-600 mb-4">{description}</p>
-      <button className="w-full text-center py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
-        View Details
-      </button>
-    </div>
+    <Card className="hover:shadow-lg transition-all">
+      <CardHeader className="space-y-1">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-xl">{title}</CardTitle>
+          {isOfficial && (
+            <Badge variant="secondary" className="font-medium">
+              Official
+            </Badge>
+          )}
+        </div>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm text-muted-foreground">{description}</p>
+      </CardContent>
+      <CardFooter>
+        <Button variant="outline" className="w-full">
+          View Details
+        </Button>
+      </CardFooter>
+    </Card>
   );
 };
 
