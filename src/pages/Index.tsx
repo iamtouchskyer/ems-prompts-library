@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import Navigation from "../components/Navigation";
 import ServerCard from "../components/ServerCard";
@@ -6,18 +5,13 @@ import FilterTags from "../components/FilterTags";
 
 const tags = [
   "All",
-  "Official",
-  "Search",
-  "Web Scraping",
-  "Communication",
-  "Productivity",
-  "Development",
-  "Database",
-  "Cloud Service",
-  "File System",
-  "Cloud Storage",
-  "Version Control",
-  "Other",
+  "Edge",
+  "Copilot", 
+  "SuperApp",
+  "Engineer",
+  "PM",
+  "Designer",
+  "Testing"
 ];
 
 const servers = [
@@ -25,6 +19,7 @@ const servers = [
     title: "Aiven",
     description: "Navigate your Aiven projects and interact with the PostgreSQL®, Apache Kafka®, ClickHouse® and OpenSearch® services",
     isOfficial: true,
+    tags: ["Edge", "Engineer"]
   },
   {
     title: "AWS Bedrock KB Retrieval",
@@ -36,7 +31,6 @@ const servers = [
     description: "Get prescriptive CDK advice, explain CDK Nag rules, check suppressions, generate Bedrock Agent schemas, and discover AWS Solutions Constructs patterns.",
     isOfficial: true,
   },
-  // Add more servers as needed
 ];
 
 const Index = () => {
@@ -48,13 +42,13 @@ const Index = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24">
         <div className="text-center mb-12">
           <div className="inline-block bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-medium mb-4">
-            ✨ New: Remote MCP Servers
+            ✨ New: Remote Prompts
           </div>
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Awesome MCP Servers
+            EMS Prompt Library
           </h1>
           <p className="text-xl text-gray-600">
-            A collection of servers for the Model Context Protocol.
+            A collection of prompts
           </p>
         </div>
 
@@ -71,6 +65,7 @@ const Index = () => {
               title={server.title}
               description={server.description}
               isOfficial={server.isOfficial}
+              tags={server.tags}
             />
           ))}
         </div>

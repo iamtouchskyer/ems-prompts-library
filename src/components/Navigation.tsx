@@ -1,4 +1,6 @@
+
 import { Link } from "react-router-dom";
+import { History } from "lucide-react";
 
 const Navigation = () => {
   return (
@@ -7,18 +9,16 @@ const Navigation = () => {
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
             <Link to="/" className="flex items-center">
-              <span className="text-2xl font-bold text-gray-900">EMS Prompts</span>
+              <span className="text-2xl font-bold text-gray-900">EMS Prompt Library</span>
             </Link>
           </div>
           <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-            <Link to="/" className="text-gray-900 hover:text-gray-700 px-3 py-2 text-sm font-medium">
+            <Link to="/" className="text-gray-900 hover:text-gray-700 px-3 py-2 text-sm font-medium flex items-center gap-2">
               Home
             </Link>
-            <Link to="/remote-servers" className="text-gray-900 hover:text-gray-700 px-3 py-2 text-sm font-medium">
-              Remote Servers
-            </Link>
-            <Link to="/resources" className="text-gray-900 hover:text-gray-700 px-3 py-2 text-sm font-medium">
-              Resources
+            <Link to="/history" className="text-gray-900 hover:text-gray-700 px-3 py-2 text-sm font-medium flex items-center gap-2">
+              <History className="h-4 w-4" />
+              Change History
             </Link>
           </div>
           <div>
