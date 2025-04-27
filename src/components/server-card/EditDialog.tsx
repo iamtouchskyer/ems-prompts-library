@@ -75,30 +75,42 @@ const EditDialog = ({
   const displayTitle = isNew ? t.newPrompt : editedTitle;
 
   return (
-    <DialogContent className="max-w-4xl">
+    <DialogContent className="max-w-4xl bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 border-gray-200 dark:border-gray-700 shadow-lg">
       <DialogHeader>
-        <DialogTitle>{displayTitle}{isEdited && " (*)"}</DialogTitle>
+        <DialogTitle className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+          {displayTitle}{isEdited && " (*)"}
+        </DialogTitle>
       </DialogHeader>
       <Tabs defaultValue={isNew ? "edit" : "view"} className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="view">{t.view}</TabsTrigger>
-          <TabsTrigger value="edit">{t.edit}</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+          <TabsTrigger 
+            value="view"
+            className="data-[state=active]:bg-white data-[state=active]:text-primary dark:data-[state=active]:bg-gray-700"
+          >
+            {t.view}
+          </TabsTrigger>
+          <TabsTrigger 
+            value="edit"
+            className="data-[state=active]:bg-white data-[state=active]:text-primary dark:data-[state=active]:bg-gray-700"
+          >
+            {t.edit}
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="view" className="mt-4">
           <div className="space-y-4">
             {author && (
-              <Badge variant="secondary" className="font-medium">
+              <Badge variant="secondary" className="font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100">
                 {author}
               </Badge>
             )}
             <div className="flex flex-wrap gap-2">
               {selectedTags.map((tag) => (
-                <Badge key={tag} variant="outline" className="font-medium">
+                <Badge key={tag} variant="outline" className="font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
                   {tag}
                 </Badge>
               ))}
             </div>
-            <p className="text-muted-foreground">{editedDescription}</p>
+            <p className="text-gray-600 dark:text-gray-300">{editedDescription}</p>
           </div>
         </TabsContent>
         <TabsContent value="edit" className="mt-4 space-y-4">
@@ -108,31 +120,33 @@ const EditDialog = ({
                 placeholder={t.promptTitle}
                 value={editedTitle}
                 onChange={(e) => handleContentChange(setEditedTitle, e.target.value)}
-                className="w-full"
+                className="w-full border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-blue-500"
               />
             )}
             
             <Button 
               variant="outline" 
               onClick={() => setIsTagsVisible(!isTagsVisible)}
-              className="w-full"
+              className="w-full bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
             >
               {t.tags}
             </Button>
             
             {isTagsVisible && (
-              <TagSelector
-                searchQuery={searchQuery}
-                onSearchChange={setSearchQuery}
-                selectedTags={selectedTags}
-                onTagToggle={handleTagToggle}
-              />
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                <TagSelector
+                  searchQuery={searchQuery}
+                  onSearchChange={setSearchQuery}
+                  selectedTags={selectedTags}
+                  onTagToggle={handleTagToggle}
+                />
+              </div>
             )}
 
             <Textarea
               value={editedDescription}
               onChange={(e) => handleContentChange(setEditedDescription, e.target.value)}
-              className="min-h-[200px]"
+              className="min-h-[200px] border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-blue-500"
               placeholder={t.promptDescription}
             />
 
@@ -140,14 +154,14 @@ const EditDialog = ({
               <Button 
                 variant="outline" 
                 onClick={handleRevert}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
               >
                 <RotateCcw className="h-4 w-4" />
                 {t.revert}
               </Button>
               <Button 
                 onClick={handleSave}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white"
               >
                 <Save className="h-4 w-4" />
                 {t.save}
