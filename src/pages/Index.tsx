@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import Navigation from "../components/Navigation";
 import ServerCard from "../components/ServerCard";
@@ -18,18 +19,18 @@ const servers = [
   {
     title: "Aiven",
     description: "Navigate your Aiven projects and interact with the PostgreSQL®, Apache Kafka®, ClickHouse® and OpenSearch® services",
-    isOfficial: true,
+    author: "John Doe",
     tags: ["Edge", "Engineer"]
   },
   {
     title: "AWS Bedrock KB Retrieval",
     description: "Query Amazon Bedrock Knowledge Bases using natural language to retrieve relevant information from your data sources.",
-    isOfficial: true,
+    author: "Jane Smith",
   },
   {
     title: "AWS CDK",
     description: "Get prescriptive CDK advice, explain CDK Nag rules, check suppressions, generate Bedrock Agent schemas, and discover AWS Solutions Constructs patterns.",
-    isOfficial: true,
+    author: "Mike Johnson",
   },
 ];
 
@@ -59,12 +60,17 @@ const Index = () => {
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 my-8">
+          <ServerCard
+            isNew
+            title=""
+            description=""
+          />
           {servers.map((server) => (
             <ServerCard
               key={server.title}
               title={server.title}
               description={server.description}
-              isOfficial={server.isOfficial}
+              author={server.author}
               tags={server.tags}
             />
           ))}
