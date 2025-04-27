@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -27,9 +26,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Save, RotateCcw } from "lucide-react";
+import { Plus, Save, RotateCcw, Check } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Language, useLanguage } from "./Navigation";
+import { toast } from "@/components/ui/sonner";
 
 interface ServerCardProps {
   title: string;
@@ -57,6 +57,8 @@ const ServerCard = ({ title, description, author, tags = [], isNew = false }: Se
   const [editedDescription, setEditedDescription] = useState(description);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  const [dialogTitle, setDialogTitle] = useState(title);
+  const [isEdited, setIsEdited] = useState(false);
   const { t } = useLanguage();
 
   const filteredTags = allTags.filter(tag => 
@@ -82,7 +84,10 @@ const ServerCard = ({ title, description, author, tags = [], isNew = false }: Se
 
   const handleSave = () => {
     setHasUnsavedChanges(false);
-    // Here you would typically save the changes to your backend
+    setIsEdited(false);
+    toast("Changes saved successfully", {
+      icon: <Check className="h-4 w-4" />,
+    });
   };
 
   const handleRevert = () => {
@@ -94,13 +99,13 @@ const ServerCard = ({ title, description, author, tags = [], isNew = false }: Se
   if (isNew) {
     return (
       <Card 
-        className="hover:shadow-lg transition-all cursor-pointer flex flex-col items-center justify-center h-full" 
+        className="hover:shadow-lg transition-all cursor-pointer flex flex-col items-center justify-center h-full py-8" 
         onClick={() => setIsDialogOpen(true)}
       >
-        <CardHeader className="text-center">
+        <div className="flex flex-col items-center gap-4">
           <CardTitle className="text-2xl text-gray-400">{t.createNew}</CardTitle>
-          <Plus className="w-12 h-12 text-gray-400 mt-4" />
-        </CardHeader>
+          <Plus className="w-12 h-12 text-gray-400" />
+        </div>
       </Card>
     );
   }
@@ -138,7 +143,7 @@ const ServerCard = ({ title, description, author, tags = [], isNew = false }: Se
       <Dialog open={isDialogOpen} onOpenChange={handleClose}>
         <DialogContent className="max-w-4xl">
           <DialogHeader>
-            <DialogTitle>{title}</DialogTitle>
+            <DialogTitle>{dialogTitle}{isEdited && " (*)"}</DialogTitle>
           </DialogHeader>
           <Tabs defaultValue="view" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
@@ -207,6 +212,7 @@ const ServerCard = ({ title, description, author, tags = [], isNew = false }: Se
                   onChange={(e) => {
                     setEditedDescription(e.target.value);
                     setHasUnsavedChanges(true);
+                    setIsEdited(true);
                   }}
                   className="min-h-[200px]"
                 />
