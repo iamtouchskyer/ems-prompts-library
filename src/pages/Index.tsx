@@ -1,7 +1,6 @@
-
 import { useState } from "react";
 import Navigation from "../components/Navigation";
-import ServerCard from "../components/ServerCard";
+import ServerCard from "@/components/server-card/ServerCard";
 import FilterTags from "../components/FilterTags";
 import { useLanguage } from "@/components/Navigation";
 
