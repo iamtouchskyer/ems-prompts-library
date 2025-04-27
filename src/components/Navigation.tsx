@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 
 const Navigation = () => {
@@ -8,7 +7,7 @@ const Navigation = () => {
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
             <Link to="/" className="flex items-center">
-              <span className="text-2xl font-bold text-gray-900">MCP Servers</span>
+              <span className="text-2xl font-bold text-gray-900">EMS Prompts</span>
             </Link>
           </div>
           <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
