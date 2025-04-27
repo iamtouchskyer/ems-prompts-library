@@ -3,9 +3,9 @@ import { useState } from "react";
 import Navigation from "../components/Navigation";
 import ServerCard from "../components/ServerCard";
 import FilterTags from "../components/FilterTags";
+import { useLanguage } from "@/components/Navigation";
 
 const tags = [
-  "All",
   "Edge",
   "Copilot", 
   "SuperApp",
@@ -36,6 +36,7 @@ const servers = [
 
 const Index = () => {
   const [selectedTag, setSelectedTag] = useState("All");
+  const { t } = useLanguage();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -46,10 +47,10 @@ const Index = () => {
             ✨ New: Remote Prompts
           </div>
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            EMS Prompt Library
+            {t.library}
           </h1>
           <p className="text-xl text-gray-600">
-            A collection of prompts
+            {t.collection}
           </p>
         </div>
 
