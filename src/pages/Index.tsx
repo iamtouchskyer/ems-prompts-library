@@ -1,8 +1,10 @@
+
 import { useState } from "react";
 import Navigation from "../components/Navigation";
 import ServerCard from "@/components/server-card/ServerCard";
 import FilterTags from "../components/FilterTags";
 import { useLanguage } from "@/components/Navigation";
+import CreateNewCard from "@/components/server-card/CreateNewCard";
 
 const tags = [
   "Edge",
@@ -60,11 +62,9 @@ const Index = () => {
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 my-8">
-          <ServerCard
-            isNew
-            title=""
-            description=""
-          />
+          <div className="h-full">
+            <CreateNewCard />
+          </div>
           {servers.map((server) => (
             <ServerCard
               key={server.title}

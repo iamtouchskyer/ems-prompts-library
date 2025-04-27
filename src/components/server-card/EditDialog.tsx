@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useLanguage } from "../Navigation";
 import { toast } from "@/components/ui/sonner";
 import TagSelector from "./TagSelector";
+import { Input } from "@/components/ui/input";
 
 interface EditDialogProps {
   title: string;
@@ -17,12 +18,22 @@ interface EditDialogProps {
   tags: string[];
   onClose: () => void;
   onSave: () => void;
+  isNew?: boolean;
 }
 
-const EditDialog = ({ title: initialTitle, description: initialDescription, author, tags: initialTags, onClose, onSave }: EditDialogProps) => {
+const EditDialog = ({ 
+  title: initialTitle, 
+  description: initialDescription, 
+  author, 
+  tags: initialTags, 
+  onClose, 
+  onSave,
+  isNew = false
+}: EditDialogProps) => {
   const [isTagsVisible, setIsTagsVisible] = useState(false);
   const [selectedTags, setSelectedTags] = useState<string[]>(initialTags);
   const [searchQuery, setSearchQuery] = useState("");
+  const [editedTitle, setEditedTitle] = useState(initialTitle);
   const [editedDescription, setEditedDescription] = useState(initialDescription);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isEdited, setIsEdited] = useState(false);
@@ -42,7 +53,7 @@ const EditDialog = ({ title: initialTitle, description: initialDescription, auth
     setHasUnsavedChanges(false);
     setIsEdited(false);
     onSave();
-    toast("Changes saved successfully", {
+    toast(isNew ? t.promptCreated : t.changesSaved, {
       icon: <Check className="h-4 w-4" />,
     });
   };
@@ -50,16 +61,25 @@ const EditDialog = ({ title: initialTitle, description: initialDescription, auth
   const handleRevert = () => {
     setSelectedTags(initialTags);
     setEditedDescription(initialDescription);
+    setEditedTitle(initialTitle);
     setHasUnsavedChanges(false);
     setIsEdited(false);
   };
 
+  const handleContentChange = (setter: React.Dispatch<React.SetStateAction<string>>, value: string) => {
+    setter(value);
+    setHasUnsavedChanges(true);
+    setIsEdited(true);
+  };
+
+  const displayTitle = isNew ? t.newPrompt : editedTitle;
+
   return (
     <DialogContent className="max-w-4xl">
       <DialogHeader>
-        <DialogTitle>{initialTitle}{isEdited && " (*)"}</DialogTitle>
+        <DialogTitle>{displayTitle}{isEdited && " (*)"}</DialogTitle>
       </DialogHeader>
-      <Tabs defaultValue="view" className="w-full">
+      <Tabs defaultValue={isNew ? "edit" : "view"} className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="view">{t.view}</TabsTrigger>
           <TabsTrigger value="edit">{t.edit}</TabsTrigger>
@@ -83,6 +103,15 @@ const EditDialog = ({ title: initialTitle, description: initialDescription, auth
         </TabsContent>
         <TabsContent value="edit" className="mt-4 space-y-4">
           <div className="space-y-4">
+            {isNew && (
+              <Input
+                placeholder={t.promptTitle}
+                value={editedTitle}
+                onChange={(e) => handleContentChange(setEditedTitle, e.target.value)}
+                className="w-full"
+              />
+            )}
+            
             <Button 
               variant="outline" 
               onClick={() => setIsTagsVisible(!isTagsVisible)}
@@ -102,12 +131,9 @@ const EditDialog = ({ title: initialTitle, description: initialDescription, auth
 
             <Textarea
               value={editedDescription}
-              onChange={(e) => {
-                setEditedDescription(e.target.value);
-                setHasUnsavedChanges(true);
-                setIsEdited(true);
-              }}
+              onChange={(e) => handleContentChange(setEditedDescription, e.target.value)}
               className="min-h-[200px]"
+              placeholder={t.promptDescription}
             />
 
             <div className="flex justify-end gap-2">

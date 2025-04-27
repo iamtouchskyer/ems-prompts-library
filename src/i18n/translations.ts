@@ -14,7 +14,14 @@ export const translations = {
     searchTags: "Search tags...",
     submit: "Submit",
     library: "EMS Prompt Library",
-    collection: "A collection of prompts"
+    collection: "A collection of prompts",
+    newPrompt: "New Prompt",
+    promptTitle: "Enter prompt title...",
+    promptDescription: "Enter prompt description...",
+    changesSaved: "Changes saved successfully",
+    promptCreated: "New prompt created successfully",
+    cancel: "Cancel",
+    discard: "Discard"
   },
   zh: {
     createNew: "新建",
@@ -30,6 +37,13 @@ export const translations = {
     searchTags: "搜索标签...",
     submit: "提交",
     library: "EMS 提示词库",
-    collection: "提示词集合"
+    collection: "提示词集合",
+    newPrompt: "新建提示词",
+    promptTitle: "输入提示词标题...",
+    promptDescription: "输入提示词描述...",
+    changesSaved: "更改保存成功",
+    promptCreated: "新提示词创建成功",
+    cancel: "取消",
+    discard: "放弃"
   }
 };

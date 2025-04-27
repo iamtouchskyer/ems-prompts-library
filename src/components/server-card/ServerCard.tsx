@@ -6,11 +6,10 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Dialog } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useLanguage } from "../Navigation";
-import CreateNewCard from "./CreateNewCard";
 import EditDialog from "./EditDialog";
 import type { ServerCardProps } from "./types";
 
-const ServerCard = ({ title, description, author, tags = [], isNew = false }: ServerCardProps) => {
+const ServerCard = ({ title, description, author, tags = [] }: ServerCardProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
@@ -23,10 +22,6 @@ const ServerCard = ({ title, description, author, tags = [], isNew = false }: Se
       setIsDialogOpen(false);
     }
   };
-
-  if (isNew) {
-    return <CreateNewCard onOpen={() => setIsDialogOpen(true)} />;
-  }
 
   return (
     <>
@@ -81,14 +76,14 @@ const ServerCard = ({ title, description, author, tags = [], isNew = false }: Se
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setShowUnsavedDialog(false)}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel onClick={() => setShowUnsavedDialog(false)}>{t.cancel}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
                 setIsDialogOpen(false);
                 setShowUnsavedDialog(false);
               }}
             >
-              Save
+              {t.discard}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
