@@ -25,12 +25,16 @@ const CreateNewCard = () => {
     }
   };
 
-  const handleSaveSuccess = () => {
-    setHasUnsavedChanges(false);
-    setIsDialogOpen(false);
-    toast("New prompt created successfully", {
-      icon: <Check className="h-4 w-4" />,
-    });
+  const handleSaveSuccess = async (title: string, description: string, tags: string[]) => {
+    try {
+      await createPrompt(title, description, tags);
+      setHasUnsavedChanges(false);
+      setIsDialogOpen(false);
+      toast.success("New prompt created successfully");
+    } catch (error) {
+      console.error('Error creating prompt:', error);
+      toast.error("Failed to create prompt");
+    }
   };
 
   const handleCardClick = () => {

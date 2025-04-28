@@ -1,5 +1,6 @@
 
 export interface ServerCardProps {
+  id: string;
   title: string;
   description: string;
   author?: string;

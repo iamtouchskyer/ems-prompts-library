@@ -12,16 +12,18 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/context/AuthContext";
 
 interface EditDialogProps {
+  id?: string;
   title: string;
   description: string;
   author?: string;
   tags: string[];
   onClose: () => void;
-  onSave: () => void;
+  onSave: (title: string, description: string, tags: string[]) => void;
   isNew?: boolean;
 }
 
 const EditDialog = ({ 
+  id,
   title: initialTitle, 
   description: initialDescription, 
   author, 
@@ -51,9 +53,9 @@ const EditDialog = ({
   };
 
   const handleSave = () => {
+    onSave(editedTitle, editedDescription, selectedTags);
     setHasUnsavedChanges(false);
     setIsEdited(false);
-    onSave();
     toast(isNew ? t.promptCreated : t.changesSaved, {
       icon: <Check className="h-4 w-4" />,
     });

@@ -1,10 +1,11 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navigation from "../components/Navigation";
 import ServerCard from "@/components/server-card/ServerCard";
 import FilterTags from "../components/FilterTags";
 import { useLanguage } from "@/components/Navigation";
 import CreateNewCard from "@/components/server-card/CreateNewCard";
+import { supabase } from "@/integrations/supabase/client";
 
 const tags = [
   "Edge",
@@ -16,28 +17,48 @@ const tags = [
   "Testing"
 ];
 
-const servers = [
-  {
-    title: "Aiven",
-    description: "Navigate your Aiven projects and interact with the PostgreSQL®, Apache Kafka®, ClickHouse® and OpenSearch® services",
-    author: "John Doe",
-    tags: ["Edge", "Engineer"]
-  },
-  {
-    title: "AWS Bedrock KB Retrieval",
-    description: "Query Amazon Bedrock Knowledge Bases using natural language to retrieve relevant information from your data sources.",
-    author: "Jane Smith",
-  },
-  {
-    title: "AWS CDK",
-    description: "Get prescriptive CDK advice, explain CDK Nag rules, check suppressions, generate Bedrock Agent schemas, and discover AWS Solutions Constructs patterns.",
-    author: "Mike Johnson",
-  },
-];
-
 const Index = () => {
   const [selectedTag, setSelectedTag] = useState("All");
+  const [prompts, setPrompts] = useState([]);
   const { t } = useLanguage();
+
+  useEffect(() => {
+    const fetchPrompts = async () => {
+      const { data, error } = await supabase
+        .from('prompts')
+        .select(`
+          *,
+          users:author_id (
+            username
+          )
+        `);
+
+      if (error) {
+        console.error('Error fetching prompts:', error);
+        return;
+      }
+
+      setPrompts(data);
+    };
+
+    fetchPrompts();
+
+    // Subscribe to changes
+    const channel = supabase
+      .channel('public:prompts')
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'prompts' 
+      }, () => {
+        fetchPrompts();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -65,13 +86,14 @@ const Index = () => {
           <div className="h-full">
             <CreateNewCard />
           </div>
-          {servers.map((server) => (
+          {prompts.map((prompt) => (
             <ServerCard
-              key={server.title}
-              title={server.title}
-              description={server.description}
-              author={server.author}
-              tags={server.tags}
+              key={prompt.id}
+              id={prompt.id}
+              title={prompt.title}
+              description={prompt.content}
+              author={prompt.users?.username}
+              tags={prompt.tags || []}
             />
           ))}
         </div>

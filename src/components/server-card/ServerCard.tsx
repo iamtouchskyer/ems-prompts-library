@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -8,8 +7,11 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useLanguage } from "../Navigation";
 import EditDialog from "./EditDialog";
 import type { ServerCardProps } from "./types";
+import { updatePrompt } from "@/services/promptService";
+import { toast } from "@/components/ui/sonner";
+import { useAuth } from "@/context/AuthContext";
 
-const ServerCard = ({ title, description, author, tags = [] }: ServerCardProps) => {
+const ServerCard = ({ id, title, description, author, tags = [] }: ServerCardProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
@@ -20,6 +22,22 @@ const ServerCard = ({ title, description, author, tags = [] }: ServerCardProps) 
       setShowUnsavedDialog(true);
     } else {
       setIsDialogOpen(false);
+    }
+  };
+
+  const handleSave = async (newTitle: string, newDescription: string, newTags: string[]) => {
+    try {
+      await updatePrompt(id, newTitle, newDescription, newTags);
+      setHasUnsavedChanges(false);
+      setIsDialogOpen(false);
+      toast(t.changesSaved, {
+        icon: <Check className="h-4 w-4" />,
+      });
+    } catch (error) {
+      console.error('Error updating prompt:', error);
+      toast(t.errorUpdating, {
+        variant: "destructive",
+      });
     }
   };
 
@@ -55,15 +73,13 @@ const ServerCard = ({ title, description, author, tags = [] }: ServerCardProps) 
 
       <Dialog open={isDialogOpen} onOpenChange={handleClose}>
         <EditDialog
+          id={id}
           title={title}
           description={description}
           author={author}
           tags={tags}
           onClose={() => setIsDialogOpen(false)}
-          onSave={() => {
-            setHasUnsavedChanges(false);
-            setIsDialogOpen(false);
-          }}
+          onSave={handleSave}
         />
       </Dialog>
 
