@@ -55,6 +55,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           // Create user in users table using available metadata
           const username = authUser.user_metadata?.user_name || 
                           authUser.user_metadata?.preferred_username || 
+                          authUser.user_metadata?.name ||
                           'user_' + authUser.id.substring(0, 8);
           
           const avatar = authUser.user_metadata?.avatar_url;

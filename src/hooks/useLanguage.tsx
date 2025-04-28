@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { translations } from '../i18n/translations';
 
+// Define the type for translations based on the English translation object
 type TranslationType = typeof translations.en;
 
 interface LanguageContextType {
@@ -30,7 +31,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({
   const value = {
     language,
     setLanguage,
-    t: translations[language as keyof typeof translations],
+    t: translations[language as keyof typeof translations] as TranslationType,
   };
 
   return (

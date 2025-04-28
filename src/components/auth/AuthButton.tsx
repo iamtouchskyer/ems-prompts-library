@@ -23,8 +23,8 @@ export const AuthButton = () => {
         provider: 'github',
         options: {
           redirectTo: redirectUrl,
-          // Only request base scopes needed for authentication
-          scopes: 'read:user',
+          // Request sufficient scopes for authentication
+          scopes: 'user:email read:user',
         }
       });
       
