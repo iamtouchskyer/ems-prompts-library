@@ -18,11 +18,15 @@ export const AuthButton = () => {
         }
       });
       
-      if (error) throw error;
+      if (error) {
+        console.error("Auth error:", error);
+        throw error;
+      }
     } catch (error) {
+      console.error("Sign in error:", error);
       toast({
         title: "Error",
-        description: "Could not sign in with GitHub",
+        description: "Could not sign in with GitHub. Please ensure GitHub provider is enabled in Supabase.",
         variant: "destructive"
       });
     }

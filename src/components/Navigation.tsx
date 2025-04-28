@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { History, Globe, Github, User } from "lucide-react";
 import {
@@ -33,11 +32,14 @@ const Navigation = () => {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
         fetchUserProfile(session.user.id);
       }
-    });
+    };
+    
+    checkSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
@@ -53,20 +55,33 @@ const Navigation = () => {
   }, []);
 
   const fetchUserProfile = async (userId: string) => {
-    const { data, error } = await supabase
-      .from('users')
-      .select('username, avatar_url, is_admin')
-      .eq('id', userId)
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('username, avatar_url, is_admin')
+        .eq('id', userId)
+        .single();
 
-    if (!error && data) {
-      setUser(data);
+      if (error) {
+        console.error('Error fetching user profile:', error);
+        return;
+      }
+
+      if (data) {
+        setUser(data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch user profile:', err);
     }
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
+    try {
+      await supabase.auth.signOut();
+      setUser(null);
+    } catch (err) {
+      console.error('Failed to sign out:', err);
+    }
   };
 
   return (
