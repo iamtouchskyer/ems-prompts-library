@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 
 // Define user type
 interface User {
@@ -31,7 +31,6 @@ const AuthContext = createContext<AuthContextType>({
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
-  const { toast } = useToast();
 
   // Get user profile
   const fetchUserProfile = async (userId: string) => {
@@ -53,12 +52,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (authUserData?.user) {
           const { user: authUser } = authUserData;
           
-          // Create user in users table
+          // Create user in users table using available metadata
           const username = authUser.user_metadata?.user_name || 
                           authUser.user_metadata?.preferred_username || 
-                          'user_' + authUser.id;
+                          'user_' + authUser.id.substring(0, 8);
           
           const avatar = authUser.user_metadata?.avatar_url;
+          
+          console.log("Creating new user profile with username:", username);
           
           // Insert into users table
           const { data: insertData, error: insertError } = await supabase
@@ -78,6 +79,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           }
           
           setUser(insertData);
+          console.log("User profile created successfully:", insertData);
           return;
         }
         
@@ -105,12 +107,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       await supabase.auth.signOut();
       setUser(null);
+      toast.success("Signed out successfully");
     } catch (err) {
       console.error('Failed to sign out:', err);
-      toast({
-        title: "Error",
-        description: "Failed to sign out. Please try again.",
-      });
+      toast.error("Failed to sign out. Please try again.");
     }
   };
 
@@ -119,30 +119,27 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     
     // Set auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state changed:', event, session?.user?.id);
+      console.log('Auth state changed:', event, 'User ID:', session?.user?.id);
       
-      if (session?.user) {
+      if (event === 'SIGNED_IN' && session?.user) {
         console.log('User is signed in with ID:', session.user.id);
         // Use setTimeout to avoid potential deadlocks with Supabase SDK
         setTimeout(() => {
           fetchUserProfile(session.user.id);
         }, 0);
-      } else {
-        console.log('No user session found in auth state change');
-        setUser(null);
-      }
-      
-      // Log auth events for debugging
-      if (event === 'SIGNED_IN') {
-        toast({
-          title: "Signed in successfully",
-          description: `Welcome ${session?.user?.user_metadata?.user_name || 'back'}!`,
-        });
+        
+        toast.success(`Welcome ${session.user.user_metadata?.user_name || 'back'}!`);
       } else if (event === 'SIGNED_OUT') {
-        toast({
-          title: "Signed out",
-          description: "You have been signed out."
-        });
+        console.log('User signed out');
+        setUser(null);
+        toast.info("You have been signed out.");
+      } else if (event === 'USER_UPDATED') {
+        console.log('User updated, refreshing profile');
+        if (session?.user) {
+          setTimeout(() => {
+            fetchUserProfile(session.user.id);
+          }, 0);
+        }
       }
     });
 
@@ -154,11 +151,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         
         if (error) {
           console.error("Error checking session:", error);
-          toast({
-            title: "Authentication Error",
-            description: "Could not check your login status. Please refresh the page.",
-            variant: "destructive"
-          });
+          toast.error("Could not check your login status. Please refresh the page.");
         } else {
           console.log("Session check result:", session ? "Has session" : "No session");
           
@@ -180,7 +173,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return () => {
       subscription.unsubscribe();
     };
-  }, [toast]);
+  }, []);
 
   const value = {
     user,

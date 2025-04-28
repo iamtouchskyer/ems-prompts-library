@@ -36,8 +36,10 @@ export const fetchPrompts = async () => {
 
 export const createPrompt = async (prompt: CreatePromptInput) => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    
+    if (authError || !user) {
+      console.error('Auth error when creating prompt:', authError);
       toast.error('You need to be logged in to create a prompt');
       throw new Error('Not authenticated');
     }
@@ -66,6 +68,14 @@ export const createPrompt = async (prompt: CreatePromptInput) => {
 
 export const updatePrompt = async (id: string, updates: Partial<Prompt>) => {
   try {
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    
+    if (authError || !user) {
+      console.error('Auth error when updating prompt:', authError);
+      toast.error('You need to be logged in to update a prompt');
+      throw new Error('Not authenticated');
+    }
+    
     const { data, error } = await supabase
       .from('prompts')
       .update(updates)
@@ -77,6 +87,9 @@ export const updatePrompt = async (id: string, updates: Partial<Prompt>) => {
       throw error;
     }
     
+    // If successful, record the change history
+    await recordChangeHistory(id, 'update', JSON.stringify(updates));
+    
     return data[0];
   } catch (error) {
     console.error('Failed to update prompt:', error);
@@ -86,8 +99,11 @@ export const updatePrompt = async (id: string, updates: Partial<Prompt>) => {
 
 export const recordChangeHistory = async (promptId: string, action: string, details: string) => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      console.warn('Not recording history - user not authenticated');
+      return;
+    }
     
     const { error } = await supabase
       .from('change_history')
