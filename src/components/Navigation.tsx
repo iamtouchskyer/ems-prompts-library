@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { History, Globe, Github, User } from "lucide-react";
 import {
@@ -36,7 +35,6 @@ const Navigation = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Log initial setup to help with debugging
     console.log("Navigation component mounted, checking auth state...");
 
     // First set up the auth state listener
@@ -44,11 +42,13 @@ const Navigation = () => {
       console.log("Auth state changed:", event, session?.user?.id);
       
       if (session?.user) {
+        console.log("User is signed in, fetching profile");
         // Fetch user profile when we have a session
         setTimeout(() => {
           fetchUserProfile(session.user.id);
         }, 0);
       } else {
+        console.log("No user session found");
         setUser(null);
       }
       

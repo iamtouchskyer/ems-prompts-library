@@ -16,13 +16,14 @@ export const AuthButton = () => {
     try {
       console.log("Starting GitHub OAuth flow...");
       
+      // Make sure we're using the current domain for the redirect
+      const redirectTo = `${window.location.origin}/`;
+      console.log("Redirect URL:", redirectTo);
+      
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'github',
         options: {
-          redirectTo: `${window.location.origin}/`,
-          queryParams: {
-            // Optional: Add custom parameters for GitHub auth flow
-          }
+          redirectTo: redirectTo,
         }
       });
       
@@ -32,16 +33,14 @@ export const AuthButton = () => {
       }
       
       console.log("OAuth response:", data);
-      // Note: At this point, the user will be redirected to GitHub
-      // so we don't need to handle success case here
+      // User will be redirected to GitHub at this point
     } catch (error) {
       console.error("GitHub sign in error:", error);
       setIsLoading(false);
       
-      // Show more detailed error message
       toast({
         title: "GitHub Sign-in Error",
-        description: "Could not sign in with GitHub. Please check the console for more details and ensure the GitHub provider is enabled in Supabase.",
+        description: "Could not sign in with GitHub. Please check the console for more details.",
         variant: "destructive"
       });
     }
