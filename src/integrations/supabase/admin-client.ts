@@ -1,20 +1,35 @@
-// This file contains a Supabase client with admin privileges
-// Use this client only for operations that require bypassing RLS
-import { createClient } from '@supabase/supabase-js';
+// This file provides admin functions that bypass RLS without creating a new client instance
+import { supabase } from './client';
 import type { Database } from '../../types/database';
 
-const SUPABASE_URL = "https://wldeklvaiidegtuuqmtp.supabase.co";
-// 注意：实际部署时应从环境变量中获取此密钥，而不是硬编码
-// 这个令牌需要保密，不要在客户端暴露
-const SUPABASE_SERVICE_ROLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsZGVrbHZhaWlkZWd0dXVxbXRwIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NTgxMzMzOSwiZXhwIjoyMDYxMzg5MzM5fQ.EZeQhmu0hx_NRt-6w0zgbafoxqunpdpRlrf2qvyl8yE"; // 填入您的服务角色密钥
+// Service role key - should be kept secure
+const SUPABASE_SERVICE_ROLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsZGVrbHZhaWlkZWd0dXVxbXRwIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NTgxMzMzOSwiZXhwIjoyMDYxMzg5MzM5fQ.EZeQhmu0hx_NRt-6w0zgbafoxqunpdpRlrf2qvyl8yE";
 
-export const adminSupabase = createClient<Database>(
-  SUPABASE_URL, 
-  SUPABASE_SERVICE_ROLE_KEY,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
+/**
+ * Creates a new user in the users table using the service role key to bypass RLS
+ * This function uses the existing Supabase client but adds the service role key for just this operation
+ */
+export async function createUserWithServiceRole(userData: {
+  id: string;
+  username: string;
+  avatar_url: string | null;
+  is_admin: boolean;
+}) {
+  const response = await fetch(`${supabase.supabaseUrl}/rest/v1/users`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': supabase.supabaseKey,
+      'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+      'Prefer': 'return=representation'
+    },
+    body: JSON.stringify(userData)
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(`Failed to create user: ${JSON.stringify(errorData)}`);
   }
-);
+
+  return await response.json();
+}

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { adminSupabase } from '@/integrations/supabase/admin-client'; // 导入管理员权限的客户端
+import { createUserWithServiceRole } from '@/integrations/supabase/admin-client'; 
 import { toast } from 'sonner';
 
 // Define user type
@@ -79,39 +79,32 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           
           console.log("Creating new user profile with username:", username);
           
-          // 使用具有管理员权限的客户端来绕过RLS策略
-          // Insert into users table
-          const { data: insertData, error: insertError } = await adminSupabase
-            .from('users')
-            .insert({
+          try {
+            // Use service role function to create user
+            const userData = {
               id: authUser.id,
               username: username,
               avatar_url: avatar,
               is_admin: false
-            })
-            .select()
-            .single();
+            };
             
-          if (insertError) {
+            const insertData = await createUserWithServiceRole(userData);
+            
+            if (insertData) {
+              setUser({
+                id: authUser.id,
+                username: username,
+                avatar_url: avatar,
+                is_admin: false
+              });
+              console.log("User profile created successfully:", insertData);
+              toast.success("New user profile created successfully!");
+            }
+          } catch (insertError) {
             console.error('Error creating user profile:', insertError);
             toast.error("Unable to create user profile. Please try again.");
-            
-            // Log more details for debugging RLS issues
-            console.log('Insert operation failed with:', {
-              userId: authUser.id,
-              errorCode: insertError.code,
-              errorMessage: insertError.message,
-              errorDetails: insertError.details,
-              hint: 'This may be an RLS policy issue in Supabase'
-            });
-            
             return;
           }
-          
-          setUser(insertData);
-          console.log("User profile created successfully:", insertData);
-          toast.success("New user profile created successfully!");
-          return;
         } else {
           console.error('No auth user data available to create profile');
           toast.error("Could not retrieve your user information");
@@ -148,109 +141,73 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  // Handle OAuth redirect - completely rewritten to better handle GitHub auth
+  // Handle OAuth redirect
   useEffect(() => {
     const processOAuthRedirect = async () => {
-      // 只有在OAuth回调URL上才继续处理
+      // 检查是否在OAuth回调URL上
       const isCallback = 
         window.location.search.includes('code') || 
-        window.location.hash.includes('access_token') ||
-        window.location.search.includes('error');
+        window.location.hash.includes('access_token');
       
       if (!isCallback) return;
       
       console.log("Processing OAuth redirect...");
       
-      // 如果URL中包含错误信息，显示给用户
-      if (window.location.search.includes('error')) {
-        const params = new URLSearchParams(window.location.search);
-        const errorDesc = params.get('error_description') || 'Unknown error';
-        console.error("OAuth error:", errorDesc);
-        toast.error(`Authentication error: ${errorDesc}`);
-        
-        // 清理URL
-        if (window.history && window.history.replaceState) {
-          window.history.replaceState({}, document.title, window.location.pathname);
-        }
-        return;
-      }
-      
       try {
-        // 如果我们有授权码参数，直接尝试交换会话而不检查状态
+        // 从URL获取授权码并交换会话
         if (window.location.search.includes('code')) {
           const params = new URLSearchParams(window.location.search);
           const code = params.get('code');
           
           if (code) {
-            console.log("Found authorization code, exchanging for session without state validation...");
+            console.log("Found authorization code, exchanging for session...");
             
-            // 尝试创建新的会话，从授权码开始
-            try {
-              const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+            // 直接交换授权码获取会话
+            const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+            
+            if (error) {
+              console.error("Failed to exchange code for session:", error);
+              toast.error("Failed to complete authentication. Please try again.");
+              return;
+            }
+            
+            if (data?.session?.user) {
+              console.log("Successfully created session for user:", data.session.user.id);
+              console.log("User metadata:", data.session.user.user_metadata);
               
-              if (error) {
-                console.error("Failed to exchange code for session:", error);
-                toast.error("Failed to complete authentication. Please try again.");
-                return;
+              // 获取用户资料，如果不存在则自动创建
+              await fetchUserProfile(data.session.user.id);
+              
+              // 清理URL
+              if (window.history && window.history.replaceState) {
+                window.history.replaceState({}, document.title, window.location.pathname);
               }
               
-              if (data?.session?.user) {
-                console.log("Successfully created session for user:", data.session.user.id);
-                console.log("User metadata:", data.session.user.user_metadata);
-                
-                // 现在我们有了确认的会话，创建用户资料
-                await fetchUserProfile(data.session.user.id);
-                
-                // 清理URL
-                if (window.history && window.history.replaceState) {
-                  window.history.replaceState({}, document.title, window.location.pathname);
-                }
-                
-                return;
-              }
-            } catch (exchangeError) {
-              console.error("Exchange code error:", exchangeError);
-              // 如果交换授权码失败，我们尝试使用refreshSession方法
-              try {
-                console.log("Trying alternative session method...");
-                const { data, error } = await supabase.auth.getSession();
-                if (!error && data?.session) {
-                  console.log("Got session through alternative method:", data.session.user.id);
-                  await fetchUserProfile(data.session.user.id);
-                }
-              } catch (altError) {
-                console.error("Alternative method failed:", altError);
-              }
+              toast.success("Successfully signed in with GitHub!");
+              return;
             }
           }
         }
         
-        // 最后尝试检查现有会话
-        console.log("Checking for existing session after OAuth...");
-        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-        
-        if (sessionError) {
-          console.error("Error getting session:", sessionError);
-          return;
-        }
+        // 如果无法通过授权码获取会话，尝试检查现有会话
+        const { data: sessionData } = await supabase.auth.getSession();
         
         if (sessionData?.session?.user) {
           console.log("Found existing session for user:", sessionData.session.user.id);
           await fetchUserProfile(sessionData.session.user.id);
-        } else {
-          console.log("No session found after OAuth redirect");
         }
       } catch (err) {
         console.error("Error handling OAuth redirect:", err);
+        toast.error("An error occurred during sign in. Please try again.");
       } finally {
-        // 清理URL，无论结果如何
+        // 清理URL
         if (window.history && window.history.replaceState) {
           window.history.replaceState({}, document.title, window.location.pathname);
         }
       }
     };
     
-    // 组件挂载时运行一次
+    // 组件挂载时执行一次
     processOAuthRedirect();
   }, []);
 
