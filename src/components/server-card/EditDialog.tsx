@@ -1,15 +1,15 @@
-
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Save, RotateCcw, Check } from "lucide-react";
+import { Save, RotateCcw, Check, Lock } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { useLanguage } from "../Navigation";
 import { toast } from "@/components/ui/sonner";
 import TagSelector from "./TagSelector";
 import { Input } from "@/components/ui/input";
+import { useAuth } from "@/context/AuthContext";
 
 interface EditDialogProps {
   title: string;
@@ -38,6 +38,7 @@ const EditDialog = ({
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isEdited, setIsEdited] = useState(false);
   const { t } = useLanguage();
+  const { isAuthenticated } = useAuth();
 
   const handleTagToggle = (tag: string) => {
     setSelectedTags(prev => 
@@ -81,7 +82,7 @@ const EditDialog = ({
           {displayTitle}{isEdited && " (*)"}
         </DialogTitle>
       </DialogHeader>
-      <Tabs defaultValue={isNew ? "edit" : "view"} className="w-full">
+      <Tabs defaultValue={isNew || !isAuthenticated ? (isAuthenticated ? "edit" : "view") : "view"} className="w-full">
         <TabsList className="grid w-full grid-cols-2 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
           <TabsTrigger 
             value="view"
@@ -91,9 +92,16 @@ const EditDialog = ({
           </TabsTrigger>
           <TabsTrigger 
             value="edit"
-            className="data-[state=active]:bg-white data-[state=active]:text-primary dark:data-[state=active]:bg-gray-700"
+            disabled={!isAuthenticated}
+            className={`data-[state=active]:bg-white data-[state=active]:text-primary dark:data-[state=active]:bg-gray-700 ${!isAuthenticated ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
-            {t.edit}
+            {!isAuthenticated ? (
+              <div className="flex items-center gap-1">
+                {t.edit} <Lock className="h-3 w-3 ml-1" />
+              </div>
+            ) : (
+              t.edit
+            )}
           </TabsTrigger>
         </TabsList>
         <TabsContent value="view" className="mt-4">
@@ -170,6 +178,15 @@ const EditDialog = ({
           </div>
         </TabsContent>
       </Tabs>
+      
+      {!isAuthenticated && (
+        <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 rounded-md text-sm">
+          <div className="flex items-center gap-2">
+            <Lock className="h-4 w-4" />
+            <p>Sign in to edit this prompt</p>
+          </div>
+        </div>
+      )}
     </DialogContent>
   );
 };
