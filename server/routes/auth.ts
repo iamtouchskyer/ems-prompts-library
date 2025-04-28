@@ -1,4 +1,3 @@
-
 import express from 'express';
 import passport from 'passport';
 import { Strategy as GitHubStrategy } from 'passport-github2';
@@ -45,6 +44,20 @@ router.get('/github/callback',
     res.redirect('/');
   }
 );
+
+router.get('/check', (req, res) => {
+  if (req.isAuthenticated()) {
+    res.json({
+      authenticated: true,
+      user: req.user
+    });
+  } else {
+    res.json({
+      authenticated: false,
+      user: null
+    });
+  }
+});
 
 router.get('/logout', (req, res) => {
   req.logout(() => {

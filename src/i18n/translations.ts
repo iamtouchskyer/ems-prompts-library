@@ -1,4 +1,3 @@
-
 export const translations = {
   en: {
     createNew: "Create New",
@@ -21,7 +20,9 @@ export const translations = {
     changesSaved: "Changes saved successfully",
     promptCreated: "New prompt created successfully",
     cancel: "Cancel",
-    discard: "Discard"
+    discard: "Discard",
+    login: "Login with GitHub",
+    logout: "Logout"
   },
   zh: {
     createNew: "新建",
@@ -44,6 +45,8 @@ export const translations = {
     changesSaved: "更改保存成功",
     promptCreated: "新提示词创建成功",
     cancel: "取消",
-    discard: "放弃"
+    discard: "放弃",
+    login: "使用 GitHub 登录",
+    logout: "退出登录"
   }
 };

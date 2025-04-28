@@ -1,18 +1,24 @@
 
 import { Link } from "react-router-dom";
-import { History, Globe } from "lucide-react";
+import { History, Globe, Github, User } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { translations } from "@/i18n/translations";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 
 export type Language = "en" | "zh";
 
-// Create a context to share language state
+interface User {
+  username: string;
+  avatar_url: string;
+}
+
 export const useLanguage = () => {
   const [language, setLanguage] = useState<Language>("en");
   return { language, setLanguage, t: translations[language] };
@@ -20,6 +26,30 @@ export const useLanguage = () => {
 
 const Navigation = () => {
   const { language, setLanguage, t } = useLanguage();
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    // Check if user is authenticated
+    fetch('/auth/check', { credentials: 'include' })
+      .then(res => res.json())
+      .then(data => {
+        if (data.authenticated) {
+          setUser({
+            username: data.user.username,
+            avatar_url: data.user._json.avatar_url
+          });
+        }
+      })
+      .catch(err => console.error('Error checking auth status:', err));
+  }, []);
+
+  const handleLogin = () => {
+    window.location.href = '/auth/github';
+  };
+
+  const handleLogout = () => {
+    window.location.href = '/auth/logout';
+  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-50">
@@ -52,9 +82,34 @@ const Navigation = () => {
                 <DropdownMenuItem onClick={() => setLanguage("zh")}>中文</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <button className="bg-blue-900 text-white px-4 py-2 rounded-md text-sm font-medium">
-              {t.submit}
-            </button>
+            
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-2">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={user.avatar_url} alt={user.username} />
+                      <AvatarFallback>
+                        <User className="h-4 w-4" />
+                      </AvatarFallback>
+                    </Avatar>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem disabled>{user.username}</DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleLogout}>{t.logout}</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button 
+                variant="default" 
+                className="flex items-center gap-2"
+                onClick={handleLogin}
+              >
+                <Github className="h-4 w-4" />
+                {t.login}
+              </Button>
+            )}
           </div>
         </div>
       </div>
