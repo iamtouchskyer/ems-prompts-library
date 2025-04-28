@@ -1,15 +1,16 @@
+
 import { Card, CardTitle } from "@/components/ui/card";
 import { Plus } from "lucide-react";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useState } from "react";
 import { Dialog } from "@/components/ui/dialog";
 import EditDialog from "./EditDialog";
-import { toast } from "@/components/ui/sonner";
+import { toast } from "sonner";
 import { Check, Lock } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useAuth } from "@/context/AuthContext";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { createPrompt } from "@/services/promptService"; // Add import for createPrompt
+import { createPrompt } from "@/services/promptService";
 
 const CreateNewCard = () => {
   const { t } = useLanguage();
@@ -28,7 +29,7 @@ const CreateNewCard = () => {
 
   const handleSaveSuccess = async (title: string, description: string, tags: string[]) => {
     try {
-      await createPrompt(title, description, tags);
+      await createPrompt({ title, content: description, tags, is_public: true });
       setHasUnsavedChanges(false);
       setIsDialogOpen(false);
       toast.success(t.promptCreated);

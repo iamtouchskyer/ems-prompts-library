@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -6,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Save, RotateCcw, Check, Lock } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { useLanguage } from "@/hooks/useLanguage";
-import { toast } from "@/components/ui/sonner";
+import { toast } from "sonner";
 import TagSelector from "./TagSelector";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/context/AuthContext";
@@ -56,9 +57,7 @@ const EditDialog = ({
     onSave(editedTitle, editedDescription, selectedTags);
     setHasUnsavedChanges(false);
     setIsEdited(false);
-    toast(isNew ? t.promptCreated : t.changesSaved, {
-      icon: <Check className="h-4 w-4" />,
-    });
+    toast.success(isNew ? t.promptCreated : t.changesSaved);
   };
 
   const handleRevert = () => {

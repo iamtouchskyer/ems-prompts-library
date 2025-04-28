@@ -23,7 +23,28 @@ interface LanguageContextType {
     all: string;
     library: string;
     logout: string;
-    errorUpdating: string;  // Added missing translation
+    errorUpdating: string;
+    promptCreated: string;
+    changesSaved: string;
+    failedToCreatePrompt: string;
+    signInRequired: string;
+    signInRequiredDesc: string;
+    signInToEdit: string;
+    newPrompt: string;
+    discard: string;
+    promptTitle: string;
+    promptDescription: string;
+    noTagsFound: string;
+    failedToLoadHistory: string;
+    noHistoryFound: string;
+    by: string;
+    anonymous: string;
+    thanksMessage: string;
+    collection: string;
+    error: string;
+    create: string;
+    update: string;
+    delete: string;
   };
 }
 
@@ -48,7 +69,28 @@ const LanguageContext = createContext<LanguageContextType>({
     all: '',
     library: '',
     logout: '',
-    errorUpdating: '', // Added missing translation
+    errorUpdating: '',
+    promptCreated: '',
+    changesSaved: '',
+    failedToCreatePrompt: '',
+    signInRequired: '',
+    signInRequiredDesc: '',
+    signInToEdit: '',
+    newPrompt: '',
+    discard: '',
+    promptTitle: '',
+    promptDescription: '',
+    noTagsFound: '',
+    failedToLoadHistory: '',
+    noHistoryFound: '',
+    by: '',
+    anonymous: '',
+    thanksMessage: '',
+    collection: '',
+    error: '',
+    create: '',
+    update: '',
+    delete: '',
   },
 });
 

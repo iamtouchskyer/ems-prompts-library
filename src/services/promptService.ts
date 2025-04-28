@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 
 export interface Prompt {
   id: string;
@@ -12,6 +12,8 @@ export interface Prompt {
   updated_at: string;
   is_public: boolean;
 }
+
+export type CreatePromptInput = Omit<Prompt, 'id' | 'author_id' | 'created_at' | 'updated_at'>;
 
 export const fetchPrompts = async () => {
   try {
@@ -32,15 +34,11 @@ export const fetchPrompts = async () => {
   }
 };
 
-export const createPrompt = async (prompt: Omit<Prompt, 'id' | 'author_id' | 'created_at' | 'updated_at'>) => {
+export const createPrompt = async (prompt: CreatePromptInput) => {
   try {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
-      toast({
-        title: 'Authentication Error',
-        description: 'You need to be logged in to create a prompt',
-        variant: 'destructive'
-      });
+      toast.error('You need to be logged in to create a prompt');
       throw new Error('Not authenticated');
     }
     
@@ -56,18 +54,8 @@ export const createPrompt = async (prompt: Omit<Prompt, 'id' | 'author_id' | 'cr
     
     if (error) {
       console.error('Error creating prompt:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to create prompt',
-        variant: 'destructive'
-      });
       throw error;
     }
-    
-    toast({
-      title: 'Success',
-      description: 'Prompt created successfully'
-    });
     
     return data[0];
   } catch (error) {
@@ -86,18 +74,8 @@ export const updatePrompt = async (id: string, updates: Partial<Prompt>) => {
     
     if (error) {
       console.error('Error updating prompt:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to update prompt',
-        variant: 'destructive'
-      });
       throw error;
     }
-    
-    toast({
-      title: 'Success',
-      description: 'Prompt updated successfully'
-    });
     
     return data[0];
   } catch (error) {

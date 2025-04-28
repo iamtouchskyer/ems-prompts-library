@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -8,10 +9,9 @@ import { useLanguage } from "@/hooks/useLanguage";
 import EditDialog from "./EditDialog";
 import type { ServerCardProps } from "./types";
 import { updatePrompt } from "@/services/promptService";
-import { toast } from "@/components/ui/sonner";
+import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
 import { Check } from "lucide-react";
-import { createPrompt, updatePrompt } from "@/services/promptService";
 
 const ServerCard = ({ id, title, description, author, tags = [] }: ServerCardProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -29,17 +29,13 @@ const ServerCard = ({ id, title, description, author, tags = [] }: ServerCardPro
 
   const handleSave = async (newTitle: string, newDescription: string, newTags: string[]) => {
     try {
-      await updatePrompt(id, newTitle, newDescription, newTags);
+      await updatePrompt(id, { title: newTitle, content: newDescription, tags: newTags });
       setHasUnsavedChanges(false);
       setIsDialogOpen(false);
-      toast(t.changesSaved || "Changes saved successfully", {
-        icon: <Check className="h-4 w-4" />,
-      });
+      toast.success(t.changesSaved);
     } catch (error) {
       console.error('Error updating prompt:', error);
-      toast(t.error || "Error updating prompt", {
-        // Use proper toast syntax without variant
-      });
+      toast.error(t.errorUpdating);
     }
   };
 
