@@ -10,7 +10,8 @@ import type { ServerCardProps } from "./types";
 import { updatePrompt } from "@/services/promptService";
 import { toast } from "@/components/ui/sonner";
 import { useAuth } from "@/context/AuthContext";
-import { Check } from "lucide-react"; // Add Check icon import
+import { Check } from "lucide-react";
+import { createPrompt, updatePrompt } from "@/services/promptService";
 
 const ServerCard = ({ id, title, description, author, tags = [] }: ServerCardProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);

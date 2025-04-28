@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { History, Globe, Github, User } from "lucide-react";
 import {
@@ -14,126 +15,12 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/types/database";
 import { useToast } from "@/components/ui/use-toast";
 import { useLanguage } from "@/hooks/useLanguage";
-
-interface User {
-  username: string;
-  avatar_url: string | null;
-  is_admin: boolean;
-}
+import { useAuth } from "@/context/AuthContext";
 
 const Navigation = () => {
   const { language, setLanguage, t } = useLanguage();
-  const [user, setUser] = useState<User | null>(null);
-  const [authChecked, setAuthChecked] = useState(false);
+  const { user, isAuthenticated, logout } = useAuth();
   const { toast } = useToast();
-
-  useEffect(() => {
-    console.log("Navigation component mounted, checking auth state...");
-
-    // First set up the auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Auth state changed:", event, session?.user?.id);
-      
-      if (session?.user) {
-        console.log("User is signed in, fetching profile");
-        // Fetch user profile when we have a session
-        setTimeout(() => {
-          fetchUserProfile(session.user.id);
-        }, 0);
-      } else {
-        console.log("No user session found");
-        setUser(null);
-      }
-      
-      // For debugging: log auth events
-      if (event === 'SIGNED_IN') {
-        toast({
-          title: "Signed in successfully",
-          description: `Welcome ${session?.user?.email || 'back'}!`,
-        });
-      } else if (event === 'SIGNED_OUT') {
-        toast({
-          title: "Signed out",
-          description: "You have been signed out."
-        });
-      }
-    });
-
-    // Then check for existing session
-    const checkSession = async () => {
-      try {
-        console.log("Checking for existing session...");
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error("Error checking session:", error);
-          toast({
-            title: "Authentication Error",
-            description: "Could not check your login status. Please refresh the page.",
-            variant: "destructive"
-          });
-        } else {
-          console.log("Session check result:", session ? "Has session" : "No session");
-          
-          if (session?.user) {
-            fetchUserProfile(session.user.id);
-          }
-        }
-        
-        setAuthChecked(true);
-      } catch (err) {
-        console.error("Failed to check session:", err);
-        setAuthChecked(true);
-      }
-    };
-    
-    checkSession();
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [toast]);
-
-  const fetchUserProfile = async (userId: string) => {
-    try {
-      console.log("Fetching user profile for ID:", userId);
-      
-      const { data, error } = await supabase
-        .from('users')
-        .select('username, avatar_url, is_admin')
-        .eq('id', userId)
-        .single();
-
-      if (error) {
-        console.error('Error fetching user profile:', error);
-        return;
-      }
-
-      console.log("User profile data:", data);
-      if (data) {
-        setUser(data);
-      } else {
-        console.warn("No user profile found for ID:", userId);
-      }
-    } catch (err) {
-      console.error('Failed to fetch user profile:', err);
-    }
-  };
-
-  const handleLogout = async () => {
-    try {
-      console.log("Logging out...");
-      await supabase.auth.signOut();
-      setUser(null);
-    } catch (err) {
-      console.error('Failed to sign out:', err);
-      toast({
-        title: "Error",
-        description: "Failed to sign out. Please try again.",
-        variant: "destructive"
-      });
-    }
-  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-50">
@@ -186,7 +73,7 @@ const Navigation = () => {
                       Admin Dashboard
                     </DropdownMenuItem>
                   )}
-                  <DropdownMenuItem onClick={handleLogout}>{t.logout}</DropdownMenuItem>
+                  <DropdownMenuItem onClick={logout}>{t.logout}</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (

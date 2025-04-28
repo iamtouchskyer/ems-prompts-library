@@ -24,6 +24,7 @@ export const AuthButton = () => {
         provider: 'github',
         options: {
           redirectTo: redirectUrl,
+          scopes: 'read:user user:email',
         }
       });
       
