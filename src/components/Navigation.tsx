@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { History, Globe, Github, User } from "lucide-react";
 import {
@@ -11,12 +10,17 @@ import { useState, useEffect } from "react";
 import { translations } from "@/i18n/translations";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { AuthButton } from "./auth/AuthButton";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/types/database";
 
 export type Language = "en" | "zh";
 
 interface User {
   username: string;
-  avatar_url: string;
+  avatar_url: string | null;
+  is_admin: boolean;
 }
 
 export const useLanguage = () => {
@@ -29,26 +33,40 @@ const Navigation = () => {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    // Check if user is authenticated
-    fetch('/auth/check', { credentials: 'include' })
-      .then(res => res.json())
-      .then(data => {
-        if (data.authenticated) {
-          setUser({
-            username: data.user.username,
-            avatar_url: data.user._json.avatar_url
-          });
-        }
-      })
-      .catch(err => console.error('Error checking auth status:', err));
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        fetchUserProfile(session.user.id);
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        fetchUserProfile(session.user.id);
+      } else {
+        setUser(null);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
-  const handleLogin = () => {
-    window.location.href = '/auth/github';
+  const fetchUserProfile = async (userId: string) => {
+    const { data, error } = await supabase
+      .from('users')
+      .select('username, avatar_url, is_admin')
+      .eq('id', userId)
+      .single();
+
+    if (!error && data) {
+      setUser(data);
+    }
   };
 
-  const handleLogout = () => {
-    window.location.href = '/auth/logout';
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
   };
 
   return (
@@ -88,7 +106,7 @@ const Navigation = () => {
                 <DropdownMenuTrigger asChild>
                   <button className="flex items-center gap-2">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={user.avatar_url} alt={user.username} />
+                      <AvatarImage src={user.avatar_url || undefined} alt={user.username} />
                       <AvatarFallback>
                         <User className="h-4 w-4" />
                       </AvatarFallback>
@@ -97,18 +115,16 @@ const Navigation = () => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
                   <DropdownMenuItem disabled>{user.username}</DropdownMenuItem>
+                  {user.is_admin && (
+                    <DropdownMenuItem>
+                      Admin Dashboard
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem onClick={handleLogout}>{t.logout}</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Button 
-                variant="default" 
-                className="flex items-center gap-2"
-                onClick={handleLogin}
-              >
-                <Github className="h-4 w-4" />
-                {t.login}
-              </Button>
+              <AuthButton />
             )}
           </div>
         </div>
