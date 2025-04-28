@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { History, Globe, Github, User } from "lucide-react";
 import {
@@ -38,7 +39,7 @@ const Navigation = () => {
     console.log("Navigation component mounted, checking auth state...");
 
     // First set up the auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth state changed:", event, session?.user?.id);
       
       if (session?.user) {
@@ -69,13 +70,22 @@ const Navigation = () => {
     // Then check for existing session
     const checkSession = async () => {
       try {
+        console.log("Checking for existing session...");
         const { data: { session }, error } = await supabase.auth.getSession();
         
-        console.log("Session check result:", session ? "Has session" : "No session");
-        if (error) console.error("Error checking session:", error);
-        
-        if (session?.user) {
-          fetchUserProfile(session.user.id);
+        if (error) {
+          console.error("Error checking session:", error);
+          toast({
+            title: "Authentication Error",
+            description: "Could not check your login status. Please refresh the page.",
+            variant: "destructive"
+          });
+        } else {
+          console.log("Session check result:", session ? "Has session" : "No session");
+          
+          if (session?.user) {
+            fetchUserProfile(session.user.id);
+          }
         }
         
         setAuthChecked(true);

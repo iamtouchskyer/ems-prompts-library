@@ -17,13 +17,13 @@ export const AuthButton = () => {
       console.log("Starting GitHub OAuth flow...");
       
       // Make sure we're using the current domain for the redirect
-      const redirectTo = `${window.location.origin}/`;
-      console.log("Redirect URL:", redirectTo);
+      const redirectUrl = `${window.location.origin}/`;
+      console.log("Redirect URL:", redirectUrl);
       
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'github',
         options: {
-          redirectTo: redirectTo,
+          redirectTo: redirectUrl,
         }
       });
       
@@ -40,7 +40,7 @@ export const AuthButton = () => {
       
       toast({
         title: "GitHub Sign-in Error",
-        description: "Could not sign in with GitHub. Please check the console for more details.",
+        description: "Could not sign in with GitHub. Please try again later.",
         variant: "destructive"
       });
     }
