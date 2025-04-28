@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from "react";
 import Navigation from "@/components/Navigation";
-import { useLanguage } from "@/components/Navigation";
+import { useLanguage } from "@/hooks/useLanguage";
 import { fetchHistory } from "@/services/historyService";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -29,7 +28,7 @@ const History = () => {
         const data = await fetchHistory();
         setHistory(data);
       } catch (err) {
-        setError("Failed to load history records");
+        setError(t.failedToLoadHistory);
         console.error(err);
       } finally {
         setLoading(false);
@@ -37,7 +36,7 @@ const History = () => {
     };
 
     loadHistory();
-  }, []);
+  }, [t]);
 
   const getChangeTypeColor = (type: string) => {
     switch (type.toLowerCase()) {
@@ -76,7 +75,7 @@ const History = () => {
           </div>
         ) : history.length === 0 ? (
           <div className="text-center p-6 bg-gray-50 dark:bg-gray-800 rounded-lg text-gray-500 dark:text-gray-400">
-            No history records found
+            {t.noHistoryFound}
           </div>
         ) : (
           <div className="space-y-4">
@@ -88,7 +87,7 @@ const History = () => {
                       variant="outline" 
                       className={`font-medium ${getChangeTypeColor(record.change_type)}`}
                     >
-                      {record.change_type}
+                      {t[record.change_type.toLowerCase()] || record.change_type}
                     </Badge>
                     <span className="text-blue-600 dark:text-blue-400 font-medium">{record.prompt_title}</span>
                   </div>
@@ -98,7 +97,7 @@ const History = () => {
                 </div>
                 <p className="text-gray-700 dark:text-gray-300 mb-2">{record.change_description}</p>
                 <div className="flex items-center mt-2 text-sm text-gray-500 dark:text-gray-400">
-                  <span>by {record.user_name || 'Anonymous'}</span>
+                  <span>{t.by} {record.user_name || t.anonymous}</span>
                 </div>
               </Card>
             ))}

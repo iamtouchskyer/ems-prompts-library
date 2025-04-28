@@ -1,6 +1,5 @@
-
 import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
-import { useLanguage } from "../Navigation";
+import { useLanguage } from "@/hooks/useLanguage";
 import { allTags } from "./types";
 
 interface TagSelectorProps {
@@ -24,7 +23,7 @@ const TagSelector = ({ searchQuery, onSearchChange, selectedTags, onTagToggle }:
         onValueChange={onSearchChange}
       />
       <CommandList>
-        <CommandEmpty>No tags found.</CommandEmpty>
+        <CommandEmpty>{t.noTagsFound}</CommandEmpty>
         <CommandGroup>
           {filteredTags.map((tag) => (
             <CommandItem

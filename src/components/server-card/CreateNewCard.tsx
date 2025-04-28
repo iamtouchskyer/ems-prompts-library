@@ -1,7 +1,6 @@
-
 import { Card, CardTitle } from "@/components/ui/card";
 import { Plus } from "lucide-react";
-import { useLanguage } from "../Navigation";
+import { useLanguage } from "@/hooks/useLanguage";
 import { useState } from "react";
 import { Dialog } from "@/components/ui/dialog";
 import EditDialog from "./EditDialog";
@@ -32,10 +31,10 @@ const CreateNewCard = () => {
       await createPrompt(title, description, tags);
       setHasUnsavedChanges(false);
       setIsDialogOpen(false);
-      toast.success("New prompt created successfully");
+      toast.success(t.promptCreated);
     } catch (error) {
       console.error('Error creating prompt:', error);
-      toast.error("Failed to create prompt");
+      toast.error(t.failedToCreatePrompt);
     }
   };
 
@@ -43,8 +42,8 @@ const CreateNewCard = () => {
     if (isAuthenticated) {
       setIsDialogOpen(true);
     } else {
-      toast("Please sign in to create new prompts", {
-        description: "You need to be logged in to create or edit prompts.",
+      toast(t.signInRequired, {
+        description: t.signInRequiredDesc,
       });
     }
   };
@@ -70,7 +69,7 @@ const CreateNewCard = () => {
           </TooltipTrigger>
           {!isAuthenticated && (
             <TooltipContent>
-              <p>Sign in to create new prompts</p>
+              <p>{t.signInToEdit}</p>
             </TooltipContent>
           )}
         </Tooltip>

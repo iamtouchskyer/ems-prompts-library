@@ -1,11 +1,10 @@
-
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { useLanguage } from "../Navigation";
+import { useLanguage } from "@/hooks/useLanguage";
 import EditDialog from "./EditDialog";
 import type { ServerCardProps } from "./types";
 import { updatePrompt } from "@/services/promptService";

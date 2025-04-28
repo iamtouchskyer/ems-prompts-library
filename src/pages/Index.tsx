@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from "react";
 import Navigation from "../components/Navigation";
 import ServerCard from "@/components/server-card/ServerCard";
 import FilterTags from "../components/FilterTags";
-import { useLanguage } from "@/components/Navigation";
+import { useLanguage } from "@/hooks/useLanguage";
 import CreateNewCard from "@/components/server-card/CreateNewCard";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -66,7 +65,7 @@ const Index = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24">
         <div className="text-center mb-12">
           <div className="inline-block bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-medium mb-4">
-            ✨ Thanks Jingxia ✨
+            {t.thanksMessage}
           </div>
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
             {t.library}

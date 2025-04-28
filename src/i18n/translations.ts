@@ -17,15 +17,31 @@ export const enUS = {
   promptTitle: "Prompt Title",
   promptDescription: "Prompt Description",
   newPrompt: "New Prompt",
-  library: "Prompt Library",
-  collection: "A collection of useful prompts",
+  library: "EMS Prompt Library",
+  collection: "A collection of prompts",
   login: "Login",
   signup: "Sign Up",
   logout: "Logout",
-  // Add these new keys
   changesSaved: "Changes saved successfully",
   promptCreated: "New prompt created successfully",
-  error: "An error occurred"
+  error: "An error occurred",
+  
+  // Add more translations for non-header content
+  loading: "Loading...",
+  noHistoryFound: "No history records found",
+  failedToLoadHistory: "Failed to load history records",
+  by: "by",
+  anonymous: "Anonymous",
+  create: "Create",
+  update: "Update",
+  delete: "Delete",
+  thanksMessage: "✨ Thanks Jingxia ✨",
+  signInRequired: "Please sign in to create new prompts",
+  signInRequiredDesc: "You need to be logged in to create or edit prompts.",
+  signInToEdit: "Sign in to edit this prompt",
+  failedToCreatePrompt: "Failed to create prompt",
+  noTagsFound: "No tags found",
+  all: "All"
 };
 
 export const zhCN = {
@@ -46,13 +62,35 @@ export const zhCN = {
   promptTitle: "提示标题",
   promptDescription: "提示描述",
   newPrompt: "新的提示",
-  library: "提示库",
-  collection: "有用的提示集合",
+  library: "EMS提示库",
+  collection: "提示集合",
   login: "登录",
   signup: "注册",
   logout: "登出",
-  // Add these new keys with Chinese translations
   changesSaved: "更改已成功保存",
   promptCreated: "新提示已成功创建",
-  error: "发生错误"
+  error: "发生错误",
+  
+  // Add more translations for non-header content
+  loading: "加载中...",
+  noHistoryFound: "未找到历史记录",
+  failedToLoadHistory: "加载历史记录失败",
+  by: "由",
+  anonymous: "匿名用户",
+  create: "创建",
+  update: "更新",
+  delete: "删除",
+  thanksMessage: "✨ 感恩璟夏 ✨",
+  signInRequired: "请登录以创建新提示",
+  signInRequiredDesc: "您需要登录才能创建或编辑提示。",
+  signInToEdit: "登录以编辑此提示",
+  failedToCreatePrompt: "创建提示失败",
+  noTagsFound: "未找到标签",
+  all: "全部"
+};
+
+// Export a translations object that contains both language sets
+export const translations = {
+  en: enUS,
+  zh: zhCN
 };

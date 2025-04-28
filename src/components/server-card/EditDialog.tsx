@@ -5,7 +5,7 @@ import { DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Save, RotateCcw, Check, Lock } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
-import { useLanguage } from "../Navigation";
+import { useLanguage } from "@/hooks/useLanguage";
 import { toast } from "@/components/ui/sonner";
 import TagSelector from "./TagSelector";
 import { Input } from "@/components/ui/input";
@@ -185,7 +185,7 @@ const EditDialog = ({
         <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 rounded-md text-sm">
           <div className="flex items-center gap-2">
             <Lock className="h-4 w-4" />
-            <p>Sign in to edit this prompt</p>
+            <p>{t.signInToEdit}</p>
           </div>
         </div>
       )}

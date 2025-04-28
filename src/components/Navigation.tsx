@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { History, Globe, Github, User } from "lucide-react";
 import {
@@ -8,26 +7,19 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useState, useEffect } from "react";
-import { translations } from "@/i18n/translations";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { AuthButton } from "./auth/AuthButton";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/types/database";
 import { useToast } from "@/components/ui/use-toast";
-
-export type Language = "en" | "zh";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface User {
   username: string;
   avatar_url: string | null;
   is_admin: boolean;
 }
-
-export const useLanguage = () => {
-  const [language, setLanguage] = useState<Language>("en");
-  return { language, setLanguage, t: translations[language] };
-};
 
 const Navigation = () => {
   const { language, setLanguage, t } = useLanguage();
@@ -164,7 +156,7 @@ const Navigation = () => {
           <div className="flex items-center gap-4">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-2 text-gray-900 hover:text-gray-700">
+                <button className="flex items-center gap-2 text-gray-900 hover:text-gray-700" aria-label="Language selection">
                   <Globe className="h-4 w-4" />
                   <span className="text-sm">{language === "en" ? "English" : "中文"}</span>
                 </button>
@@ -178,7 +170,7 @@ const Navigation = () => {
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-2">
+                  <button className="flex items-center gap-2" aria-label={`User menu for ${user.username}`}>
                     <Avatar className="h-8 w-8">
                       <AvatarImage src={user.avatar_url || undefined} alt={user.username} />
                       <AvatarFallback>
