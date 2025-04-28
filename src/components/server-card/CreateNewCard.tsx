@@ -1,3 +1,4 @@
+
 import { Card, CardTitle } from "@/components/ui/card";
 import { Plus } from "lucide-react";
 import { useLanguage } from "../Navigation";
@@ -9,6 +10,7 @@ import { Check, Lock } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useAuth } from "@/context/AuthContext";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { createPrompt } from "@/services/promptService"; // Add import for createPrompt
 
 const CreateNewCard = () => {
   const { t } = useLanguage();

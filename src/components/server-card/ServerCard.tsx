@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,7 @@ import type { ServerCardProps } from "./types";
 import { updatePrompt } from "@/services/promptService";
 import { toast } from "@/components/ui/sonner";
 import { useAuth } from "@/context/AuthContext";
+import { Check } from "lucide-react"; // Add Check icon import
 
 const ServerCard = ({ id, title, description, author, tags = [] }: ServerCardProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -30,13 +32,13 @@ const ServerCard = ({ id, title, description, author, tags = [] }: ServerCardPro
       await updatePrompt(id, newTitle, newDescription, newTags);
       setHasUnsavedChanges(false);
       setIsDialogOpen(false);
-      toast(t.changesSaved, {
+      toast(t.changesSaved || "Changes saved successfully", {
         icon: <Check className="h-4 w-4" />,
       });
     } catch (error) {
       console.error('Error updating prompt:', error);
-      toast(t.errorUpdating, {
-        variant: "destructive",
+      toast(t.error || "Error updating prompt", {
+        // Use proper toast syntax without variant
       });
     }
   };
