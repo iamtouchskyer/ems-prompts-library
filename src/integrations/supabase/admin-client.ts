@@ -1,3 +1,4 @@
+
 // This file provides admin functions that bypass RLS without creating a new client instance
 import { supabase } from './client';
 import type { Database } from '../../types/database';
@@ -15,21 +16,35 @@ export async function createUserWithServiceRole(userData: {
   avatar_url: string | null;
   is_admin: boolean;
 }) {
-  const response = await fetch(`${supabase.supabaseUrl}/rest/v1/users`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'apikey': supabase.supabaseKey,
-      'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-      'Prefer': 'return=representation'
-    },
-    body: JSON.stringify(userData)
-  });
+  try {
+    console.log("Creating user with service role:", userData);
+    
+    // Validate userData properties to prevent errors
+    if (!userData.id) throw new Error('User ID is required');
+    if (!userData.username) throw new Error('Username is required');
+    
+    const response = await fetch(`${supabase.supabaseUrl}/rest/v1/users`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': supabase.supabaseKey,
+        'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify(userData)
+    });
 
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(`Failed to create user: ${JSON.stringify(errorData)}`);
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("API error creating user:", errorData);
+      throw new Error(`Failed to create user: ${JSON.stringify(errorData)}`);
+    }
+
+    const data = await response.json();
+    console.log("User created successfully:", data);
+    return data;
+  } catch (error) {
+    console.error("Error in createUserWithServiceRole:", error);
+    throw error;
   }
-
-  return await response.json();
 }

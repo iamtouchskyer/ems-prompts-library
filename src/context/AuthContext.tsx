@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { createUserWithServiceRole } from '@/integrations/supabase/admin-client'; 
@@ -31,7 +32,7 @@ const AuthContext = createContext<AuthContextType>({
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
-  const [isHandlingRedirect, setIsHandlingRedirect] = useState(false);
+  const [isProcessingOAuth, setIsProcessingOAuth] = useState(false);
 
   // Get user profile
   const fetchUserProfile = async (userId: string) => {
@@ -51,7 +52,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         .single();
 
       if (error) {
-        console.log('User not found in database, attempting to create profile...');
+        console.log('User not found in database, creating new profile...');
         console.log('Error details:', error); // Log the exact error
         
         // If the user doesn't exist, create an entry based on GitHub data
@@ -69,9 +70,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           console.log('Auth user metadata:', authUser.user_metadata);
           
           // Create user in users table using available metadata
+          // Use multiple fallbacks for username to ensure we always have something
           const username = authUser.user_metadata?.user_name || 
                           authUser.user_metadata?.preferred_username || 
                           authUser.user_metadata?.name ||
+                          authUser.user_metadata?.login ||
                           authUser.email?.split('@')[0] ||
                           'user_' + authUser.id.substring(0, 8);
           
@@ -98,28 +101,25 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 is_admin: false
               });
               console.log("User profile created successfully:", insertData);
-              toast.success("New user profile created successfully!");
+              toast.success("Welcome! New user profile created successfully!");
             }
           } catch (insertError) {
             console.error('Error creating user profile:', insertError);
             toast.error("Unable to create user profile. Please try again.");
-            return;
           }
         } else {
           console.error('No auth user data available to create profile');
           toast.error("Could not retrieve your user information");
-          return;
         }
-      }
-
-      console.log("User profile data:", data);
-      if (data) {
+      } else if (data) {
+        console.log("User profile data found:", data);
         setUser({
           id: userId,
           username: data.username,
           avatar_url: data.avatar_url,
           is_admin: data.is_admin
         });
+        toast.success(`Welcome back, ${data.username}!`);
       } else {
         console.warn("No user profile found for ID:", userId);
       }
@@ -141,20 +141,37 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  // Handle OAuth redirect
+  // Handle OAuth redirect - this runs only once on mount
   useEffect(() => {
     const processOAuthRedirect = async () => {
-      // 检查是否在OAuth回调URL上
-      const isCallback = 
-        window.location.search.includes('code') || 
-        window.location.hash.includes('access_token');
+      // Check for OAuth parameters in the URL
+      const hasOAuthParams = window.location.hash.includes('access_token') || 
+                             window.location.search.includes('code') ||
+                             window.location.search.includes('error');
       
-      if (!isCallback) return;
+      if (!hasOAuthParams) return;
       
+      setIsProcessingOAuth(true);
       console.log("Processing OAuth redirect...");
       
       try {
-        // 从URL获取授权码并交换会话
+        // If there's an error in the URL, handle it
+        if (window.location.search.includes('error')) {
+          const params = new URLSearchParams(window.location.search);
+          const error = params.get('error');
+          const errorDescription = params.get('error_description');
+          console.error("OAuth error:", error, errorDescription);
+          toast.error(`Authentication failed: ${errorDescription || error}`);
+          
+          // Clean URL
+          if (window.history && window.history.replaceState) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+          }
+          setIsProcessingOAuth(false);
+          return;
+        }
+        
+        // Exchange code for session
         if (window.location.search.includes('code')) {
           const params = new URLSearchParams(window.location.search);
           const code = params.get('code');
@@ -162,68 +179,55 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           if (code) {
             console.log("Found authorization code, exchanging for session...");
             
-            // 直接交换授权码获取会话
             const { data, error } = await supabase.auth.exchangeCodeForSession(code);
             
             if (error) {
               console.error("Failed to exchange code for session:", error);
               toast.error("Failed to complete authentication. Please try again.");
+              setIsProcessingOAuth(false);
               return;
             }
             
             if (data?.session?.user) {
               console.log("Successfully created session for user:", data.session.user.id);
-              console.log("User metadata:", data.session.user.user_metadata);
-              
-              // 获取用户资料，如果不存在则自动创建
               await fetchUserProfile(data.session.user.id);
               
-              // 清理URL
+              // Clean URL
               if (window.history && window.history.replaceState) {
                 window.history.replaceState({}, document.title, window.location.pathname);
               }
-              
-              toast.success("Successfully signed in with GitHub!");
-              return;
             }
           }
-        }
-        
-        // 如果无法通过授权码获取会话，尝试检查现有会话
-        const { data: sessionData } = await supabase.auth.getSession();
-        
-        if (sessionData?.session?.user) {
-          console.log("Found existing session for user:", sessionData.session.user.id);
-          await fetchUserProfile(sessionData.session.user.id);
         }
       } catch (err) {
         console.error("Error handling OAuth redirect:", err);
         toast.error("An error occurred during sign in. Please try again.");
       } finally {
-        // 清理URL
+        setIsProcessingOAuth(false);
+        // Clean storage flag
+        sessionStorage.removeItem('oauth_initiated');
+        
+        // Clean URL if not done already
         if (window.history && window.history.replaceState) {
           window.history.replaceState({}, document.title, window.location.pathname);
         }
       }
     };
     
-    // 组件挂载时执行一次
     processOAuthRedirect();
   }, []);
 
+  // Set up auth state listener
   useEffect(() => {
     console.log('Setting up auth state in AuthContext');
     
-    // 检查是否在 OAuth 回调 URL 上
-    const isOnOAuthCallback = () => {
-      return (window.location.hash && window.location.hash.includes('access_token')) ||
-        (window.location.search && (
-          window.location.search.includes('error') || 
-          window.location.search.includes('code')
-        ));
-    };
+    // Check if we're handling OAuth redirect
+    const isOAuthRedirect = 
+      window.location.hash.includes('access_token') || 
+      window.location.search.includes('code') ||
+      window.location.search.includes('error') ||
+      sessionStorage.getItem('oauth_initiated') === 'true';
     
-    const isOAuthRedirect = isOnOAuthCallback();
     if (isOAuthRedirect) {
       console.log("On OAuth callback URL, will ignore SIGNED_OUT events");
     }
@@ -238,12 +242,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setTimeout(() => {
           fetchUserProfile(session.user.id);
         }, 0);
-        
-        toast.success(`Welcome ${session.user.user_metadata?.user_name || 'back'}!`);
       } else if (event === 'SIGNED_OUT') {
-        // 仅在不处于 OAuth 回调时处理登出事件
-        // 这是一个关键修复 - 忽略 OAuth 过程中的 SIGNED_OUT 事件
-        if (!isOAuthRedirect && !sessionStorage.getItem('oauth_redirect_handled')) {
+        // Only handle sign out if not during OAuth process
+        if (!isOAuthRedirect) {
           console.log('User signed out');
           setUser(null);
           toast.info("You have been signed out.");
@@ -285,12 +286,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
     };
     
-    checkSession();
+    // Only check session if not processing OAuth
+    if (!isProcessingOAuth) {
+      checkSession();
+    }
 
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [isProcessingOAuth]);
 
   const value = {
     user,

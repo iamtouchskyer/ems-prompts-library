@@ -36,6 +36,21 @@ export const fetchPrompts = async () => {
 
 export const createPrompt = async (prompt: CreatePromptInput) => {
   try {
+    // Check for authenticated session first
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    
+    if (sessionError) {
+      console.error('Session error when creating prompt:', sessionError);
+      toast.error('Authentication error. Please try signing in again.');
+      throw new Error('Session error');
+    }
+    
+    if (!sessionData.session) {
+      console.error('No active session found');
+      toast.error('You need to be logged in to create a prompt');
+      throw new Error('Not authenticated');
+    }
+    
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     
     if (authError || !user) {
@@ -68,6 +83,14 @@ export const createPrompt = async (prompt: CreatePromptInput) => {
 
 export const updatePrompt = async (id: string, updates: Partial<Prompt>) => {
   try {
+    // Check for authenticated session first
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    
+    if (sessionError || !sessionData.session) {
+      toast.error('You need to be logged in to update a prompt');
+      throw new Error('Not authenticated');
+    }
+    
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     
     if (authError || !user) {
@@ -99,6 +122,13 @@ export const updatePrompt = async (id: string, updates: Partial<Prompt>) => {
 
 export const recordChangeHistory = async (promptId: string, action: string, details: string) => {
   try {
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    
+    if (sessionError || !sessionData.session) {
+      console.warn('Not recording history - user not authenticated');
+      return;
+    }
+    
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       console.warn('Not recording history - user not authenticated');

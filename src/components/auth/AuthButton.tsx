@@ -1,3 +1,4 @@
+
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Github } from "lucide-react";
@@ -14,17 +15,17 @@ export const AuthButton = () => {
     try {
       console.log("Starting GitHub OAuth flow...");
       
-      // 使用当前页面作为重定向URL
+      // Use the current page as the redirect URL
       const redirectUrl = window.location.origin;
       console.log("Redirect URL:", redirectUrl);
       
-      // 使用GitHub OAuth进行登录
+      // Use GitHub OAuth for login with appropriate scopes
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'github',
         options: {
           redirectTo: redirectUrl,
-          // 请求用户邮箱和基本信息权限
-          scopes: 'user:email read:user'
+          // Ask for minimal required permissions to avoid permissions errors
+          scopes: 'read:user'
         }
       });
       
@@ -35,6 +36,9 @@ export const AuthButton = () => {
       }
       
       console.log("OAuth initiated successfully");
+      
+      // Set a flag to indicate we've initiated OAuth
+      sessionStorage.setItem('oauth_initiated', 'true');
     } catch (error) {
       console.error("GitHub sign in error:", error);
       toast.error("Could not sign in with GitHub. Please try again later.");

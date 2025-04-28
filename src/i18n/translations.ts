@@ -39,7 +39,15 @@ export const translations = {
     error: 'Error',
     create: 'Create',
     update: 'Update',
-    delete: 'Delete'
+    delete: 'Delete',
+    // Add authentication-specific translations
+    loginSuccess: 'Logged in successfully',
+    signupSuccess: 'Account created successfully',
+    authError: 'Authentication error',
+    sessionExpired: 'Your session has expired',
+    welcomeBack: 'Welcome back!',
+    welcome: 'Welcome to the Prompts Library!',
+    githubLoginError: 'Failed to authenticate with GitHub'
   },
   zh: {
     createNew: '新建',
@@ -80,6 +88,14 @@ export const translations = {
     error: '错误',
     create: '创建',
     update: '更新',
-    delete: '删除'
+    delete: '删除',
+    // Add authentication-specific translations
+    loginSuccess: '登录成功',
+    signupSuccess: '账户创建成功',
+    authError: '验证错误',
+    sessionExpired: '您的会话已过期',
+    welcomeBack: '欢迎回来！',
+    welcome: '欢迎使用提示词库！',
+    githubLoginError: '使用 GitHub 验证失败'
   }
 };

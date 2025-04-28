@@ -31,7 +31,8 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({
   const value = {
     language,
     setLanguage,
-    t: translations[language as keyof typeof translations] as TranslationType,
+    // Use type assertion to ensure the compiler knows we're providing a valid translation object
+    t: (translations[language as keyof typeof translations] || translations.en) as TranslationType,
   };
 
   return (
