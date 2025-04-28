@@ -45,7 +45,7 @@ const Index = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24">
         <div className="text-center mb-12">
           <div className="inline-block bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-medium mb-4">
-            ✨ New: Remote Prompts
+            ✨ Thanks Jingxia ✨
           </div>
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
             {t.library}
