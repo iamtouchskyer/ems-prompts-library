@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { History, Globe, Github, User } from "lucide-react";
 import {
@@ -13,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { AuthButton } from "./auth/AuthButton";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/types/database";
+import { useToast } from "@/components/ui/use-toast";
 
 export type Language = "en" | "zh";
 
@@ -30,32 +32,70 @@ export const useLanguage = () => {
 const Navigation = () => {
   const { language, setLanguage, t } = useLanguage();
   const [user, setUser] = useState<User | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+    // Log initial setup to help with debugging
+    console.log("Navigation component mounted, checking auth state...");
+
+    // First set up the auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("Auth state changed:", event, session?.user?.id);
+      
       if (session?.user) {
-        fetchUserProfile(session.user.id);
+        // Fetch user profile when we have a session
+        setTimeout(() => {
+          fetchUserProfile(session.user.id);
+        }, 0);
+      } else {
+        setUser(null);
+      }
+      
+      // For debugging: log auth events
+      if (event === 'SIGNED_IN') {
+        toast({
+          title: "Signed in successfully",
+          description: `Welcome ${session?.user?.email || 'back'}!`,
+        });
+      } else if (event === 'SIGNED_OUT') {
+        toast({
+          title: "Signed out",
+          description: "You have been signed out."
+        });
+      }
+    });
+
+    // Then check for existing session
+    const checkSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        console.log("Session check result:", session ? "Has session" : "No session");
+        if (error) console.error("Error checking session:", error);
+        
+        if (session?.user) {
+          fetchUserProfile(session.user.id);
+        }
+        
+        setAuthChecked(true);
+      } catch (err) {
+        console.error("Failed to check session:", err);
+        setAuthChecked(true);
       }
     };
     
     checkSession();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        fetchUserProfile(session.user.id);
-      } else {
-        setUser(null);
-      }
-    });
-
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [toast]);
 
   const fetchUserProfile = async (userId: string) => {
     try {
+      console.log("Fetching user profile for ID:", userId);
+      
       const { data, error } = await supabase
         .from('users')
         .select('username, avatar_url, is_admin')
@@ -67,8 +107,11 @@ const Navigation = () => {
         return;
       }
 
+      console.log("User profile data:", data);
       if (data) {
         setUser(data);
+      } else {
+        console.warn("No user profile found for ID:", userId);
       }
     } catch (err) {
       console.error('Failed to fetch user profile:', err);
@@ -77,10 +120,16 @@ const Navigation = () => {
 
   const handleLogout = async () => {
     try {
+      console.log("Logging out...");
       await supabase.auth.signOut();
       setUser(null);
     } catch (err) {
       console.error('Failed to sign out:', err);
+      toast({
+        title: "Error",
+        description: "Failed to sign out. Please try again.",
+        variant: "destructive"
+      });
     }
   };
 
