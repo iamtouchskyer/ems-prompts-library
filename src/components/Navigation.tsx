@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { History, Globe, Github, User } from "lucide-react";
 import {
@@ -11,7 +12,6 @@ import { translations } from "@/i18n/translations";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { AuthButton } from "./auth/AuthButton";
-import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/types/database";
 
